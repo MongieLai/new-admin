@@ -1,4 +1,3 @@
-@import '~antd/dist/antd.css';
 #root {
   height: 100%;
 }
@@ -10,5 +9,25 @@
 }
 
 .site-layout .site-layout-background {
+  background: #fff;
+}
+
+.ant-card-body {
+  height: 100%;
+}
+
+.checkbox {
+  border: 2px solid #39c;
+}
+
+.checkbox-checked {
+  background: #39c;
+}
+
+.panel-body {
+  border-color: #ccc;
+}
+
+.window {
   background: #fff;
 }
