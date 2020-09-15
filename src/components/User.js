@@ -1,8 +1,12 @@
 import React, { Component } from 'react'
-import { DataGrid, Messager, GridColumn, Pagination, CheckBox, TextBox, LinkButton } from 'rc-easyui';
+import { DataGrid, GridColumn, Pagination, CheckBox, TextBox, LinkButton } from 'rc-easyui';
 import styled from 'styled-components';
-import { message } from 'antd'
+import { message, Modal } from 'antd'
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 import logo from '../images/fuyou-logo.png'
+
+const { confirm } = Modal;
+
 // 最外层容器样式
 const Container = styled.div` 
     height:100%;
@@ -46,7 +50,10 @@ class User extends Component {
             ],
             allChecked: false,
             rowClicked: false,
-            selectorList: []
+            selectorList: [],
+            ModalText: '确定要删除选中内容吗?',
+            visible: false,
+            confirmLoading: false,
         }
     }
 
@@ -145,40 +152,50 @@ class User extends Component {
         console.log('你点了我')
     }
 
-    confirm() {
-        this.messager.confirm({
-            msg: "确定要删除选中内容吗?",
-            result: r => {
-                if (r) {
-                    alert("confirmed: " + r);
-                }
-            }
+    showModal = () => {
+        this.setState({
+            visible: true,
         });
-    }
+    };
+
+    handleOk = () => {
+        this.setState({
+            ModalText: '删除中...',
+            confirmLoading: true,
+        });
+        setTimeout(() => {
+            this.setState({
+                visible: false,
+                confirmLoading: false,
+            });
+            message.success('删除成功！');
+        }, 2000);
+    };
+
+    handleCancel = () => {
+        console.log('Clicked cancel button');
+        this.setState({
+            visible: false,
+        });
+    };
 
     render() {
+        const { visible, confirmLoading, ModalText } = this.state;
         return (
             <Container>
-                <Messager
-                    ref={ref => this.messager = ref}
-                    content={({ title, msg, buttons }) => (
-                        <div className="m-content">
-                            <h2>{title}</h2>
-                            <p>{msg}</p>
-                            <div className="m-buttons">
-                                {
-                                    buttons.map((button, index) => (
-                                        <LinkButton
-                                            key={index}
-                                            text={button.text}
-                                            onClick={() => this.messager.close(button)}
-                                        />
-                                    ))
-                                }
-                            </div>
-                        </div>
-                    )}
-                />
+                <Modal
+                    cancelText='取消'
+                    okText='确定'
+                    title="删除确认"
+                    content='Some descriptions'
+                    visible={visible}
+                    onOk={this.handleOk}
+                    confirmLoading={confirmLoading}
+                    onCancel={this.handleCancel}
+                >
+                    <p><ExclamationCircleOutlined style={{ color: 'red', marginRight: 4 }} />{ModalText}</p>
+                </Modal>
+
                 <ActionsBar>
                     <LinkButton iconCls="icon-add" plain onClick={() => { this.skipRouteToAdd() }}>新增用户</LinkButton>
                     <LinkButton iconCls='icon-no' plain onClick={this.handelActionsBarDelete}>删除用户</LinkButton>
@@ -214,7 +231,7 @@ class User extends Component {
                         render={({ row }) => (
                             <div style={{ padding: 4 }}>
                                 <LinkButton iconCls='icon-edit' onClick={() => this.handelEdit(row)} style={{ marginRight: 4 }}>编辑</LinkButton>
-                                <LinkButton iconCls='icon-no' onClick={() => this.handelDelete(row)} > 删除</LinkButton>
+                                <LinkButton iconCls='icon-no' onClick={() => this.showModal(row)} > 删除</LinkButton>
                             </div>
                         )}
                     />
