@@ -199,10 +199,6 @@ class User extends Component {
                 <ActionsBar>
                     <LinkButton iconCls="icon-add" plain onClick={() => { this.skipRouteToAdd() }}>添加轮播图</LinkButton>
                     <LinkButton iconCls='icon-no' plain onClick={this.handelActionsBarDelete}>删除轮播图</LinkButton>
-                    <span style={{ marginLeft: 24 }}>请输入用户名称:</span>
-                    <TextBox onChange={searchInputValue => this.setState({ searchInputValue })} placeholder="请输入" style={{ width: 220 }} value={this.state.searchInputValue}></TextBox>
-                    <LinkButton iconCls="icon-search" plain onClick={() => { this.handelSearch() }}>查询</LinkButton>
-                    <LinkButton iconCls="icon-reload" plain onClick={() => { this.handelResetSearch() }}>重置</LinkButton>
                 </ActionsBar>
 
                 <DataGrid data={this.state.data}>
