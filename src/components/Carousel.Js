@@ -1,34 +1,42 @@
 import React, { Component } from 'react'
-import { DataGrid, GridColumn, Pagination, LinkButton } from 'rc-easyui';
+import { DataGrid, GridColumn, Pagination, CheckBox, TextBox, LinkButton } from 'rc-easyui';
 import styled from 'styled-components';
+import { message, Modal } from 'antd'
+import { ExclamationCircleOutlined } from '@ant-design/icons';
 
+import logo from '../images/fuyou-logo.png'
+const { confirm } = Modal;
+
+// 最外层容器样式
+const Container = styled.div` 
+    height:100%;
+    padding: 4px;
+    display:flex;
+    flex-direction:column;
+    > div:nth-child(2){
+        flex-grow:1;
+        overflow-y:auto;
+       
+    }
+    
+`
+
+//添加查询栏
 const ActionsBar = styled.div`
     display:flex;
-    padding:8px 8px 8px 20px;
+    margin-bottom:16px;
     align-items:center;
     span{
         margin-right:10px;
     }
 `
 
-const Container = styled.div`
-    height:100%;
-    display:flex;
-    flex-direction:column;
-    > div:nth-child(2){
-        flex-grow:1;
-        overflow-y:auto;
-        > .panel-body{
-            border-color: #cccccc !important;
-        }
-    }
-`
-
-class Carousel extends Component {
+class User extends Component {
     constructor() {
         super();
         this.state = {
             data: this.getData(),
+            searchInputValue: '',
             pageNumber: 1,
             pageSize: 50,
             total: 50,
@@ -40,14 +48,75 @@ class Carousel extends Component {
                 "next",
                 "last",
             ],
+            allChecked: false,
+            rowClicked: false,
+            selectorList: [],
+            ModalText: '确定要删除选中内容吗?',
+            visible: false,
+            confirmLoading: false,
         }
     }
 
-    getData() {
+    getData = () => {
         return [
-            { "U_ID": "T01", "C_BANNER_NAME": "三八妇女宣传图", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
-            { "U_ID": "T02", "C_BANNER_NAME": "宣传图", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "1" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "1" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "1" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "1" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "1" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "1" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "1" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "1" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
+            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
         ]
+    }
+
+
+    handleRowCheck(row, checked) {
+        let data = this.state.data.slice();
+        let index = this.state.data.indexOf(row);
+        data.splice(index, 1, Object.assign({}, row, { selected: checked }));
+        let checkedRows = data.filter(row => row.selected);
+        this.setState({
+            allChecked: data.length === checkedRows.length,
+            rowClicked: true,
+            data: data
+        }, () => {
+            this.setState({ rowClicked: false })
+        });
+    }
+    handleAllCheck(checked) {
+        if (this.state.rowClicked) {
+            return;
+        }
+        let data = this.state.data.map(row => {
+            return Object.assign({}, row, { selected: checked })
+        });
+        this.setState({
+            allChecked: checked,
+            data: data
+        })
     }
 
     handelEdit = (row) => {
@@ -56,40 +125,115 @@ class Carousel extends Component {
 
     handelDelete = (row) => {
         console.log('你点了删除按钮')
+    };
+
+    handelSearch = () => {
+        console.log('你点了查询按钮')
+        const { searchInputValue } = this.state
+        console.log(searchInputValue)
     }
 
-    handelPublish = () => {
-        console.log('你点了发布按钮')
+    handelResetSearch = () => {
+        console.log('你点了重置按钮')
     }
 
     skipRouteToAdd = () => {
-        this.props.history.push('/system/lbgl/add')
+        this.props.history.push('carousel/add')
     }
 
+    handelActionsBarDelete = () => {
+        if (this.state.selectorList.length === 0) {
+            message.error('当前没有选中任何数据，无法删除！');
+            return
+        }
+        console.log('你点了我')
+    }
+
+    showModal = () => {
+        this.setState({
+            visible: true,
+        });
+    };
+
+    handleOk = () => {
+        this.setState({
+            ModalText: '删除中...',
+            confirmLoading: true,
+        });
+        setTimeout(() => {
+            this.setState({
+                visible: false,
+                confirmLoading: false,
+            });
+            message.success('删除成功！');
+        }, 2000);
+    };
+
+    handleCancel = () => {
+        console.log('Clicked cancel button');
+        this.setState({
+            visible: false,
+        });
+    };
+
+
+
     render() {
+        const { visible, confirmLoading, ModalText } = this.state;
+
         return (
-            <Container style={{ padding: 4 }}>
+            <Container>
+
+                <Modal
+                    cancelText='取消'
+                    okText='确定'
+                    title="删除确认"
+                    content='Some descriptions'
+                    visible={visible}
+                    onOk={this.handleOk}
+                    confirmLoading={confirmLoading}
+                    onCancel={this.handleCancel}
+                >
+                    <p><ExclamationCircleOutlined style={{ color: 'red', marginRight: 4 }} />{ModalText}</p>
+                </Modal>
                 <ActionsBar>
-                    <LinkButton iconCls="icon-add" plain onClick={() => this.skipRouteToAdd()}>新增轮播图片</LinkButton>
+                    <LinkButton iconCls="icon-add" plain onClick={() => { this.skipRouteToAdd() }}>添加轮播图</LinkButton>
+                    <LinkButton iconCls='icon-no' plain onClick={this.handelActionsBarDelete}>删除轮播图</LinkButton>
                 </ActionsBar>
+
                 <DataGrid data={this.state.data}>
-                    <GridColumn sortable field="U_ID" title="序号" align="center" />
-                    <GridColumn sortable field="C_BANNER_NAME" title="图片名称" align="center" />
-                    <GridColumn sortable field="C_ADD_NAME" title="操作人" align="center" />
-                    <GridColumn sortable field="D_ADDTIME" title="操作时间" align="center" width={110} />
-                    <GridColumn sortable field="C_IS_PUBLISH" title="发布状态" align="center" width={110}
+                    <GridColumn
+                        width={50} align="center"
                         render={({ row }) => (
-                            row.C_IS_PUBLISH === `0` ? '未发布' : '已发布'
+                            <CheckBox checked={row.selected} onChange={(checked) => this.handleRowCheck(row, checked)}></CheckBox>
+                        )}
+                        header={() => (
+                            <CheckBox checked={this.state.allChecked} onChange={(checked) => this.handleAllCheck(checked)}></CheckBox>
                         )} />
-                    <GridColumn title="操作" align="center" width={220}
+                    <GridColumn sortable field="U_ID" title="序号" align="center" />
+                    <GridColumn title="图片" align="center"
                         render={({ row }) => (
                             <div style={{ padding: 4 }}>
-                                {row.C_IS_PUBLISH === '0' ? <LinkButton iconCls='icon-ok' onClick={() => this.handelPublish()} style={{ marginRight: 4 }}>发布</LinkButton> : null}
-                                <LinkButton iconCls='icon-edit' onClick={() => this.handelEdit(row)} style={{ marginRight: 4 }}>编辑</LinkButton>
-                                <LinkButton iconCls='icon-no' onClick={() => this.handelDelete(row)} > 删除</LinkButton>
+                                <img src={logo}></img>
                             </div>
                         )}
                     />
+                    <GridColumn sortable field="C_ADD_NAME" title="操作人" align="center" />
+                    <GridColumn sortable field="D_UPDATETIME" title="操作时间" align="center" />
+                    <GridColumn field="C_STAT" title="用户状态" align="center"
+                        render={({ row }) => (
+                            row.C_IS_PUBLISH === `1` ? '已发布' : '未发布'
+                        )}></GridColumn>
+                    <GridColumn title="操作" align="center"
+                        render={({ row }) => (
+                            <div style={{ padding: 4 }}>
+                                {row.C_IS_PUBLISH === '0' && <LinkButton iconCls='icon-edit' onClick={() => this.handelEdit(row)} style={{ marginRight: 4 }}>发布</LinkButton>}
+                                <LinkButton iconCls='icon-edit' onClick={() => this.handelEdit(row)} style={{ marginRight: 4 }}>编辑</LinkButton>
+                                <LinkButton iconCls='icon-no' onClick={() => this.showModal(row)} > 删除</LinkButton>
+                            </div>
+                        )}
+                    />
+
                 </DataGrid>
                 <Pagination
                     pageList={[50]}
@@ -104,4 +248,4 @@ class Carousel extends Component {
     }
 }
 
-export default Carousel
+export default User

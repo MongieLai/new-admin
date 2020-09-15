@@ -7,7 +7,9 @@ import { HashRouter as Router, Link, Switch, Route, Redirect } from 'react-route
 import { Layout, Menu, Card } from 'antd';
 
 import User from './components/User'
-import Carousel from './components/Add'
+import Carousel from './components/Carousel'
+import CarouselAdd from './components/Fuck'
+import MyMenu from './components/Menu'
 
 //导航图标
 import {
@@ -105,14 +107,13 @@ class App extends React.Component {
 
             <Content style={{ margin: '16px' }}>
               <Card style={{ width: '100%', height: '100%' }}>
-
                 <Redirect from='/' to='/user' />
-                <Route path='/user'>
-                  <User></User>
+                <Route path='/user' component={User} />
+                <Route path='/carousel/add'>
+                  <CarouselAdd />
                 </Route>
-                <Route path='/carousel'>
-                  <Carousel />
-                </Route>
+                <Route exact path='/carousel' component={Carousel} />
+                <Route exact path='/menu' component={MyMenu} />
               </Card>,
 
             </Content>
