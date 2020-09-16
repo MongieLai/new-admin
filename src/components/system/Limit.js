@@ -1,11 +1,13 @@
 import React, { Component } from 'react'
-import { DataGrid, GridColumn, Pagination, CheckBox, LinkButton } from 'rc-easyui';
+import { DataGrid, GridColumn, Pagination, CheckBox, TextBox, LinkButton } from 'rc-easyui';
 import styled from 'styled-components';
-import { message, Modal } from 'antd';
+import { message, Modal } from 'antd'
 import { ExclamationCircleOutlined } from '@ant-design/icons';
-import logo from '../images/fuyou-logo.png';
 
-const Container = styled.div`
+const { confirm } = Modal;
+
+// 最外层容器样式
+const Container = styled.div` 
     height:100%;
     padding: 4px;
     display:flex;
@@ -13,19 +15,22 @@ const Container = styled.div`
     > div:nth-child(2){
         flex-grow:1;
         overflow-y:auto;
+       
     }
+    
 `
 
+//添加查询栏
 const ActionsBar = styled.div`
     display:flex;
-    padding:8px 8px 8px 20px;
+    margin-bottom:16px;
     align-items:center;
     span{
         margin-right:10px;
     }
 `
 
-export default class Carousel extends Component {
+class User extends Component {
     constructor() {
         super();
         this.state = {
@@ -53,10 +58,8 @@ export default class Carousel extends Component {
 
     getData = () => {
         return [
-            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "0" },
-            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "1" },
-            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "1" },
-            { "U_ID": "T01", "C_BANNER_NAME": "/images/xxx.jpg", "C_ADD_NAME": "李四", "D_ADDTIME": "2018-09-10", "C_IS_PUBLISH": "1" },
+            { "U_ID": "T01", "ip_addr": "120.237.154.53", "D_ADDTIME": "2018-09-10", "status": "0" },
+            { "U_ID": "T01", "ip_addr": "122.237.154.53", "D_ADDTIME": "2018-09-10", "status": "1" },
         ]
     }
 
@@ -74,8 +77,6 @@ export default class Carousel extends Component {
             this.setState({ rowClicked: false })
         });
     }
-
-
     handleAllCheck(checked) {
         if (this.state.rowClicked) {
             return;
@@ -108,7 +109,7 @@ export default class Carousel extends Component {
     }
 
     skipRouteToAdd = () => {
-        this.props.history.push('carousel/add')
+        this.props.history.push('/system/limit/add')
     }
 
     handelActionsBarDelete = () => {
@@ -147,10 +148,13 @@ export default class Carousel extends Component {
     };
 
 
+
     render() {
         const { visible, confirmLoading, ModalText } = this.state;
+
         return (
             <Container>
+
                 <Modal
                     cancelText='取消'
                     okText='确定'
@@ -164,9 +168,10 @@ export default class Carousel extends Component {
                     <p><ExclamationCircleOutlined style={{ color: 'red', marginRight: 4 }} />{ModalText}</p>
                 </Modal>
                 <ActionsBar>
-                    <LinkButton iconCls="icon-add" plain onClick={() => { this.skipRouteToAdd() }}>添加轮播图</LinkButton>
-                    <LinkButton iconCls='icon-no' plain onClick={this.handelActionsBarDelete}>删除轮播图</LinkButton>
+                    <LinkButton iconCls="icon-add" plain onClick={() => { this.skipRouteToAdd() }}>添加限制IP地址</LinkButton>
+                    <LinkButton iconCls='icon-no' plain onClick={this.handelActionsBarDelete}>解除IP限制</LinkButton>
                 </ActionsBar>
+
                 <DataGrid data={this.state.data}>
                     <GridColumn
                         width={50} align="center"
@@ -177,25 +182,13 @@ export default class Carousel extends Component {
                             <CheckBox checked={this.state.allChecked} onChange={(checked) => this.handleAllCheck(checked)}></CheckBox>
                         )} />
                     <GridColumn sortable field="U_ID" title="序号" align="center" />
-                    <GridColumn title="图片" align="center"
-                        render={({ row }) => (
-                            <div style={{ padding: 4 }}>
-                                <img src={logo}></img>
-                            </div>
-                        )}
-                    />
-                    <GridColumn sortable field="C_ADD_NAME" title="操作人" align="center" />
-                    <GridColumn sortable field="D_UPDATETIME" title="操作时间" align="center" />
-                    <GridColumn field="C_STAT" title="用户状态" align="center"
-                        render={({ row }) => (
-                            row.C_IS_PUBLISH === `1` ? '已发布' : '未发布'
-                        )}></GridColumn>
+                    <GridColumn sortable field="ip_addr" title="ip地址" align="center" />
+                    <GridColumn sortable field="D_ADDTIME" title="操作时间" align="center" />
                     <GridColumn title="操作" align="center"
                         render={({ row }) => (
                             <div style={{ padding: 4 }}>
-                                {row.C_IS_PUBLISH === '0' && <LinkButton iconCls='icon-edit' onClick={() => this.handelEdit(row)} style={{ marginRight: 4 }}>发布</LinkButton>}
                                 <LinkButton iconCls='icon-edit' onClick={() => this.handelEdit(row)} style={{ marginRight: 4 }}>编辑</LinkButton>
-                                <LinkButton iconCls='icon-no' onClick={() => this.showModal(row)} > 删除</LinkButton>
+                                <LinkButton iconCls='icon-no' onClick={() => this.showModal(row)} >解除</LinkButton>
                             </div>
                         )}
                     />
@@ -209,7 +202,9 @@ export default class Carousel extends Component {
                     layout={this.state.layout}
                     onPageChange={event => this.handlePageChange(event)}
                 />
-            </Container>
-        )
+            </Container >
+        );
     }
 }
+
+export default User

@@ -47,7 +47,7 @@ const Container = styled.div`
     }
 `
 
-class Carousel extends Component {
+class CarouselAdd extends Component {
     constructor() {
         super();
         this.state = {
@@ -237,4 +237,4 @@ class Carousel extends Component {
     }
 }
 
-export default Carousel
+export default CarouselAdd

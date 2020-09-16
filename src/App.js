@@ -8,9 +8,12 @@ import { Layout, Menu, Card } from 'antd';
 
 import User from './components/User'
 import Carousel from './components/Carousel'
-import CarouselAdd from './components/Fuck'
+import CarouselAdd from './components/CarouselAdd'
 import MyMenu from './components/Menu'
-
+import Limit from './components/system/Limit'
+import LimitAdd from './components/system/LimitAdd'
+import Warn from './components/system/Warn'
+import Visit from './components/system/Visit'
 //导航图标
 import {
   PictureOutlined,
@@ -50,7 +53,7 @@ class App extends React.Component {
     this.state = {
       collapsed: false,
       menuList: [],
-      name: '张飞'
+      name: 'Admin'
     };
   }
 
@@ -84,13 +87,13 @@ class App extends React.Component {
               </Menu.Item>
               <SubMenu key="system" title="系统管理" icon={<BugOutlined />}>
                 <Menu.Item key="visit">
-                  <Link to='/ststem/visit'>访问记录</Link>
+                  <Link to='/system/visit'>访问记录</Link>
                 </Menu.Item>
                 <Menu.Item key="warn">
-                  <Link to='/ststem/warn'>恶意访问</Link>
+                  <Link to='/system/warn'>恶意访问管理</Link>
                 </Menu.Item>
                 <Menu.Item key="limit">
-                  <Link to='/ststem/limit'>限制地址管理</Link>
+                  <Link to='/system/limit'>限制地址管理</Link>
                 </Menu.Item>
               </SubMenu>
             </Menu>
@@ -109,16 +112,18 @@ class App extends React.Component {
               <Card style={{ width: '100%', height: '100%' }}>
                 <Redirect from='/' to='/user' />
                 <Route path='/user' component={User} />
-                <Route path='/carousel/add'>
-                  <CarouselAdd />
-                </Route>
+                <Route path='/carousel/add' component={CarouselAdd} />
                 <Route exact path='/carousel' component={Carousel} />
                 <Route exact path='/menu' component={MyMenu} />
+                <Route exact path='/system/limit' component={Limit} />
+                <Route exact path='/system/limit/add' component={LimitAdd} />
+                <Route exact path='/system/warn' component={Warn} />
+                <Route exact path='/system/visit' component={Visit} />
               </Card>,
 
             </Content>
 
-            <Footer style={{ textAlign: 'center' }}>©2020 珠海百智科技</Footer>
+            <Footer style={{ textAlign: 'center', padding: 0, marginBottom: 16 }}>©2020 珠海百智科技</Footer>
 
           </Layout>
         </Layout>
