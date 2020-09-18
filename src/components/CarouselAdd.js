@@ -126,16 +126,19 @@ class CarouselAdd extends Component {
     };
     fuck = (file, fileList) => {
         console.log(file)
-        return this.checkImageWH(file, 82, 101)
+        return this.checkImageWH(file, 1920, 500)
     }
 
     checkImageWH = (file, width, height) => {
+
         return new Promise(function (resolve, reject) {
             let filereader = new FileReader()
             filereader.onload = e => {
                 let src = e.target.result
                 const image = new Image()
                 image.onload = function () {
+                    console.log(this.width)
+                    console.log(this.height)
                     if (width && this.width / this.height !== width / height) {
                         // debugger
                         Modal.error({
@@ -199,15 +202,6 @@ class CarouselAdd extends Component {
                         <Input style={{ width: '50%' }} disabled value={this.state.caozuobumen} />
                     </Form.Item>
                     <Form.Item label="操作人" >
-                        {/* <Select
-                            placeholder="Select a option and change input text above"
-                            onChange={this.onGenderChange}
-                            allowClear
-                        >
-                            <Option value="male">male</Option>
-                            <Option value="female">female</Option>
-                            <Option value="other">other</Option>
-                        </Select> */}
                         <Input style={{ width: '50%' }} disabled value={this.state.caozuoren} />
                     </Form.Item>
                     <Form.Item
@@ -215,15 +209,15 @@ class CarouselAdd extends Component {
                         shouldUpdate={(prevValues, currentValues) => prevValues.gender !== currentValues.gender}
                     >
                         {({ getFieldValue }) => {
-                            return getFieldValue('gender') === 'other' ? (
-                                <Form.Item
+                            return getFieldValue('gender') === 'other' ?
+                                (<Form.Item
                                     name="customizeGender"
                                     label="Customize Gender"
                                     rules={[{ required: true }]}
                                 >
                                     <Input />
-                                </Form.Item>
-                            ) : null;
+                                </Form.Item>) :
+                                null;
                         }}
                     </Form.Item>
                     <Form.Item {...tailLayout}>

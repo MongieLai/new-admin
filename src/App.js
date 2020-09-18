@@ -10,7 +10,9 @@ import User from './components/User'
 import Carousel from './components/Carousel'
 import CarouselAdd from './components/CarouselAdd'
 import MyMenu from './components/Menu'
+import Nav from './components/Nav'
 import Limit from './components/system/Limit'
+import LimitA from './components/system/LimitBF'
 import LimitAdd from './components/system/LimitAdd'
 import Warn from './components/system/Warn'
 import Visit from './components/system/Visit'
@@ -22,8 +24,6 @@ import {
   BugOutlined,
   UserOutlined,
 } from '@ant-design/icons';
-
-
 
 const { Header, Content, Footer, Sider } = Layout;
 const { SubMenu } = Menu;
@@ -70,7 +70,7 @@ class App extends React.Component {
     return (
       <Router>
         <Layout style={{ height: '100vh' }}>
-          <Sider style={{ height: '100%' }} collapsible collapsed={this.state.collapsed} onCollapse={this.onCollapse}>
+          <Sider style={{ height: '100%' }} collapsed={this.state.collapsed} onCollapse={this.onCollapse}>
             <TitleWrapper>妇幼后台管理系统</TitleWrapper>
             <Menu theme="dark" defaultOpenKeys={['system']} defaultSelectedKeys={['user']} mode="inline">
               <Menu.Item key="user" icon={<UserOutlined />}>
@@ -111,14 +111,17 @@ class App extends React.Component {
             <Content style={{ margin: '16px' }}>
               <Card style={{ width: '100%', height: '100%' }}>
                 <Redirect from='/' to='/user' />
-                <Route path='/user' component={User} />
-                <Route path='/carousel/add' component={CarouselAdd} />
+                <Route exact path='/user' component={User} />
+                <Route exact path='/carousel/add' component={CarouselAdd} />
                 <Route exact path='/carousel' component={Carousel} />
-                <Route exact path='/menu' component={MyMenu} />
+                <Route exact path='/menu' component={Nav} />
+                {/* <Route exact path='/index' component={Nav} /> */}
+                <Route exact path='/index' component={LimitA} />
                 <Route exact path='/system/limit' component={Limit} />
                 <Route exact path='/system/limit/add' component={LimitAdd} />
                 <Route exact path='/system/warn' component={Warn} />
                 <Route exact path='/system/visit' component={Visit} />
+                {/* <Route  path='*' component={Nav} /> */}
               </Card>,
 
             </Content>

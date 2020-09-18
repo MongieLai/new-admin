@@ -103,7 +103,7 @@ class Carousel extends Component {
                     title="添加限制访问IP"
                 />
                 <Form {...layout} ref={this.formRef} name="control-ref" onFinish={this.onFinish} initialValues={{ ipType: 1 }}>
-                    <Form.Item name="ipType" label="添加单个IP地址或IP段">
+                    <Form.Item name="ipType" label="添加单个IP地址/IP段">
                         <Radio.Group onChange={this.onChange} initialValues={1}>
                             <Radio value={1}>IP地址</Radio>
                             <Radio value={0}>IP段</Radio>

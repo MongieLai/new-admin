@@ -1,210 +1,343 @@
 import React, { Component } from 'react'
-import { DataGrid, GridColumn, Pagination, CheckBox, TextBox, LinkButton } from 'rc-easyui';
-import styled from 'styled-components';
-import { message, Modal } from 'antd'
+import { Table, Input, Form, message, InputNumber, Tabs, Modal, Button, Space, Descriptions } from 'antd';
 import { ExclamationCircleOutlined } from '@ant-design/icons';
 
-const { confirm } = Modal;
+const { TabPane } = Tabs;
 
-// 最外层容器样式
-const Container = styled.div` 
-    height:100%;
-    padding: 4px;
-    display:flex;
-    flex-direction:column;
-    > div:nth-child(2){
-        flex-grow:1;
-        overflow-y:auto;
-       
-    }
-    
-`
+const layout = {
+    labelCol: {
+        span: 6,
+    },
+    wrapperCol: {
+        span: 18,
+    },
+};
+const ipModalLayout = {
+    labelCol: {
+        span: 4,
+    },
+    wrapperCol: {
+        span: 20,
+    },
+};
+export class Warn extends Component {
+    state = {
+        data: [],
+        visible: false,
+        selectedRowKeys: [], // Check here to configure the default column
+        loading: false,
+        configSubmitButton: false,
+        configTime: 24,
+        configCount: 100,
+        addIpListLoading: false,
+        ipModalVisible: false,
+        deleteVisible: false,
+        tempObj: null,
+        deleteActive: false,
+        editIpVisible: false
+    };
 
-//添加查询栏
-const ActionsBar = styled.div`
-    display:flex;
-    margin-bottom:16px;
-    align-items:center;
-    span{
-        margin-right:10px;
-    }
-`
-
-class User extends Component {
-    constructor() {
-        super();
-        this.state = {
-            data: this.getData(),
-            searchInputValue: '',
-            pageNumber: 1,
-            pageSize: 50,
-            total: 50,
-            layout: [
-                "list",
-                "first",
-                "prev",
-                "links",
-                "next",
-                "last",
-            ],
-            allChecked: false,
-            rowClicked: false,
-            selectorList: [],
-            ModalText: '确定要删除选中内容吗?',
-            visible: false,
-            confirmLoading: false,
+    columns = [
+        {
+            title: '序号',
+            dataIndex: 'id'
+        },
+        {
+            title: 'IP地址',
+            dataIndex: 'ipAddr',
+        },
+        {
+            title: '操作时间',
+            dataIndex: 'handelAt'
+        },
+        {
+            title: '操作',
+            key: 'action',
+            render: (text, record) => (
+                <Space>
+                    <Button type='primary' onClick={() => {
+                        this.setState({
+                            editIpVisible: true,
+                            tempObj: text
+                        })
+                        console.log(text)
+                    }}>编辑</Button>
+                    <Button type='danger' onClick={() => {
+                        this.setState({
+                            deleteVisible: true,
+                            tempObj: text
+                        })
+                        console.log(text)
+                    }}>移除限制名单</Button>
+                </Space>
+            ),
         }
-    }
+    ];
 
-    getData = () => {
-        return [
-            { "U_ID": "T01", "ip_addr": "120.237.154.53", "D_ADDTIME": "2018-09-10", "status": "0" },
-            { "U_ID": "T01", "ip_addr": "122.237.154.53", "D_ADDTIME": "2018-09-10", "status": "1" },
-        ]
-    }
-
-
-    handleRowCheck(row, checked) {
-        let data = this.state.data.slice();
-        let index = this.state.data.indexOf(row);
-        data.splice(index, 1, Object.assign({}, row, { selected: checked }));
-        let checkedRows = data.filter(row => row.selected);
-        this.setState({
-            allChecked: data.length === checkedRows.length,
-            rowClicked: true,
-            data: data
-        }, () => {
-            this.setState({ rowClicked: false })
-        });
-    }
-    handleAllCheck(checked) {
-        if (this.state.rowClicked) {
-            return;
+    //组件挂载后初始化ip白名单数据
+    componentDidMount = () => {
+        const data = [];
+        for (let i = 0; i < 11; i++) {
+            data.push({
+                id: i < 9 ? `0${i + 1}` : i + 1,
+                key: i,
+                ipAddr: `192.168.2.${i}`,
+                handelAt: new Date().toISOString()
+            });
         }
-        let data = this.state.data.map(row => {
-            return Object.assign({}, row, { selected: checked })
-        });
         this.setState({
-            allChecked: checked,
-            data: data
+            data
         })
     }
 
-    handelEdit = (row) => {
-        console.log('你点了编辑按钮')
-    }
-
-    handelDelete = (row) => {
-        console.log('你点了删除按钮')
-    };
-
-    handelSearch = () => {
-        console.log('你点了查询按钮')
-        const { searchInputValue } = this.state
-        console.log(searchInputValue)
-    }
-
-    handelResetSearch = () => {
-        console.log('你点了重置按钮')
-    }
-
-    skipRouteToAdd = () => {
-        this.props.history.push('/system/limit/add')
-    }
-
-    handelActionsBarDelete = () => {
-        if (this.state.selectorList.length === 0) {
-            message.error('当前没有选中任何数据，无法删除！');
-            return
-        }
-        console.log('你点了我')
-    }
+    //Dom引用
+    configFormRef = React.createRef();
+    ipFormRef = React.createRef()
 
     showModal = () => {
         this.setState({
             visible: true,
         });
     };
+    onFinish = values => {
+        console.log(values);
+    };
 
-    handleOk = () => {
+    handelWarnSubmit = async () => { //修改预警配置提交时触发
+        const values = await this.configFormRef.current.validateFields()
+        //校验通过时value为表单全部值的合集
+        if (values.errorFields) { //有校验失败信息时则返回
+            return
+        }
         this.setState({
-            ModalText: '删除中...',
-            confirmLoading: true,
+            configSubmitButton: true
         });
         setTimeout(() => {
             this.setState({
                 visible: false,
-                confirmLoading: false,
+                ipVisible: false,
+                configSubmitButton: false,
+                configTime: values.time,
+                configCount: values.count,
             });
-            message.success('删除成功！');
-        }, 2000);
-    };
+            this.configFormRef.current.setFieldsValue({
+                time: values.time,
+                count: values.count,
+            })
 
-    handleCancel = () => {
-        console.log('Clicked cancel button');
+            message.success('修改成功')
+        }, 1000)
+        //发送修改警告时间和次数成功后执行回调
+    }
+
+    addIpList = async () => {
+        const values = await this.ipFormRef.current.validateFields()
+        if (values.errorFields) {
+            return
+        }
+        this.setState({
+            ipModalVisible: true,
+            ipVisible: true,
+            addIpListLoading: true
+        });
+        setTimeout(() => {
+            this.setState({
+                ipModalVisible: false,
+                addIpListLoading: false,
+                data: [...this.state.data, { key: this.state.data.length, ipAddr: values.ipAddr }]
+            });
+            message.success('添加成功')
+        }, 1000)
+    }
+
+    editIp = async () => {
+        const values = await this.editIpFormRef.validateFields()
+        if (values.errorFields) {
+            return
+        }
+        console.log(values)
+        const { data, tempObj } = this.state
+        data.map((item, index) => {
+            if (item.ipAddr === tempObj.ipAddr) {
+                data[index].ipAddr = values.ipAddr
+            }
+        })
+        console.log(data)
+        this.setState({
+            addIpListLoading: true
+        });
+        setTimeout(() => {
+            this.setState({
+                data,
+                editIpVisible: false,
+                addIpListLoading: false
+            });
+            message.success('编辑成功')
+        }, 1000)
+    }
+
+    hideModal = () => {
         this.setState({
             visible: false,
         });
+    }
+
+    start = () => {
+        this.setState({ loading: true });
+        // ajax request after empty completing
+        setTimeout(() => {
+            this.setState({
+                selectedRowKeys: [],
+                loading: false,
+            });
+        }, 1000);
     };
 
+    onSelectChange = (selectedRowKeys, selectedRows) => {
+        console.log('selectedRowKeys changed: ', selectedRowKeys);
+        console.log(selectedRows)
+        this.setState({ selectedRowKeys, selectedRows });
+    };
 
+    deleteInLine = () => {
+        const { tempObj, data, deleteActive, selectedRows } = this.state
+        let newData
+        if (deleteActive) {
+            console.log('你是点击操作栏的删除')
+            newData = data.filter(item => {
+                let temp = false
+                selectedRows.map(i => {
+                    if (item.ipAddr === i.ipAddr) {
+                        temp = true
+                    }
+                })
+                if (!temp) {
+                    return item
+                }
+            })
+        }
+        else {
+            console.log('你是行内删除')
+            newData = data.filter(item => {
+                if (item.ipAddr !== tempObj.ipAddr) {
+                    return item
+                }
+            })
+        }
+        this.setState({
+            confirmLoading: true
+        })
+        setTimeout(() => {
+            this.setState({
+                data: newData,
+                deleteVisible: false,
+                confirmLoading: false,
+                deleteActive: false
+            })
+            message.success('删除成功')
+        }, 2000)
+    }
+
+    actionBarDelete = () => {
+        this.setState({
+            deleteVisible: true,
+            deleteActive: true
+        })
+    }
 
     render() {
-        const { visible, confirmLoading, ModalText } = this.state;
-
+        const { data, addIpListLoading, confirmLoading, deleteVisible, selectedRowKeys, configSubmitButton, configTime, configCount } = this.state;
+        const rowSelection = {
+            selectedRowKeys,
+            onChange: this.onSelectChange,
+        };
+        const hasSelected = selectedRowKeys.length > 0;
         return (
-            <Container>
+            <>
+                <Tabs defaultActiveKey="1" onChange={this.callback}>
+                    <TabPane tab="已限制访问IP名单" key="1">
+                        <Space size="large" style={{ marginBottom: 8 }}>
+                            <Button type="primary" onClick={() => { this.setState({ ipModalVisible: true }) }} >
+                                添加
+                            </Button>
+                            <Button type="danger" disabled={!hasSelected} onClick={this.actionBarDelete}>移除</Button>
+                        </Space>
+                        <Table bordered scroll={{ y: 500 }} rowSelection={rowSelection} columns={this.columns} dataSource={data} />
+                    </TabPane>
+                </Tabs>
+
+
+                {/* 弹窗交互组件 */}
+                <Modal
+                    maskClosable={true}
+                    title="修改访问预警配置"
+                    visible={this.state.visible}
+                    onCancel={this.hideModal}
+                    cancelText='取消'
+                    okText='修改'
+                    onOk={this.handelWarnSubmit}
+                    confirmLoading={configSubmitButton}
+                >
+                    <Form initialValues={{ time: this.state.configTime, count: this.state.configCount }} {...layout} ref={this.configFormRef} name="control-ref" onFinish={this.onFinish} >
+                        <Form.Item name='time' label="时间(单位小时)" rules={[{ required: true, message: '请输入时间' }]}>
+                            <InputNumber style={{ width: '100%' }} />
+                        </Form.Item>
+                        <Form.Item name='count' label="次数" rules={[{ required: true, message: '请输入次数' }]}>
+                            <InputNumber style={{ width: '100%' }} />
+                        </Form.Item>
+                    </Form>
+                </Modal>
+
+                <Modal
+                    visible={this.state.ipModalVisible}
+                    onCancel={() => this.setState({ ipModalVisible: false })}
+                    maskClosable={true}
+                    title="添加IP白名单"
+                    cancelText='取消'
+                    okText='添加'
+                    onOk={this.addIpList}
+                    confirmLoading={addIpListLoading}
+                >
+                    <Form {...ipModalLayout} ref={this.ipFormRef} name="ip-ref" >
+                        <Form.Item name='ipAddr' label="IP地址" rules={[{ required: true, message: '请输入IP地址' }]}>
+                            <Input />
+                        </Form.Item>
+                    </Form>
+                </Modal>
+                {this.state.tempObj && <Modal
+                    visible={this.state.editIpVisible}
+                    onCancel={() => this.setState({ editIpVisible: false, tempObj: null })}
+                    maskClosable={true}
+                    title="编辑IP白名单"
+                    cancelText='取消'
+                    okText='修改'
+                    onOk={this.editIp}
+                    confirmLoading={addIpListLoading}
+                >
+                    <Form {...ipModalLayout} ref={ref => this.editIpFormRef = ref} name="edit-ip-ref" autoComplete="off">
+                        <Form.Item name='ipAddr' label="IP地址" rules={[{ required: true, message: '请输入IP地址' }]} initialValue={this.state.tempObj.ipAddr}>
+                            <Input />
+                        </Form.Item>
+                    </Form>
+                </Modal>}
+
+
 
                 <Modal
                     cancelText='取消'
                     okText='确定'
                     title="删除确认"
                     content='Some descriptions'
-                    visible={visible}
-                    onOk={this.handleOk}
+                    visible={deleteVisible}
+                    onOk={this.deleteInLine}
                     confirmLoading={confirmLoading}
-                    onCancel={this.handleCancel}
+                    onCancel={() => { this.setState({ deleteVisible: false, deleteActive: false }) }}
                 >
-                    <p><ExclamationCircleOutlined style={{ color: 'red', marginRight: 4 }} />{ModalText}</p>
+                    <p><ExclamationCircleOutlined style={{ color: 'red', marginRight: 4 }} />确定要删除选中内容吗?</p>
                 </Modal>
-                <ActionsBar>
-                    <LinkButton iconCls="icon-add" plain onClick={() => { this.skipRouteToAdd() }}>添加限制IP地址</LinkButton>
-                    <LinkButton iconCls='icon-no' plain onClick={this.handelActionsBarDelete}>解除IP限制</LinkButton>
-                </ActionsBar>
-
-                <DataGrid data={this.state.data}>
-                    <GridColumn
-                        width={50} align="center"
-                        render={({ row }) => (
-                            <CheckBox checked={row.selected} onChange={(checked) => this.handleRowCheck(row, checked)}></CheckBox>
-                        )}
-                        header={() => (
-                            <CheckBox checked={this.state.allChecked} onChange={(checked) => this.handleAllCheck(checked)}></CheckBox>
-                        )} />
-                    <GridColumn sortable field="U_ID" title="序号" align="center" />
-                    <GridColumn sortable field="ip_addr" title="ip地址" align="center" />
-                    <GridColumn sortable field="D_ADDTIME" title="操作时间" align="center" />
-                    <GridColumn title="操作" align="center"
-                        render={({ row }) => (
-                            <div style={{ padding: 4 }}>
-                                <LinkButton iconCls='icon-edit' onClick={() => this.handelEdit(row)} style={{ marginRight: 4 }}>编辑</LinkButton>
-                                <LinkButton iconCls='icon-no' onClick={() => this.showModal(row)} >解除</LinkButton>
-                            </div>
-                        )}
-                    />
-
-                </DataGrid>
-                <Pagination
-                    pageList={[50]}
-                    total={this.state.total}
-                    pageNumber={this.state.pageNumber}
-                    pageSize={this.state.pageSize}
-                    layout={this.state.layout}
-                    onPageChange={event => this.handlePageChange(event)}
-                />
-            </Container >
-        );
+            </>
+        )
     }
 }
 
-export default User
+export default Warn
